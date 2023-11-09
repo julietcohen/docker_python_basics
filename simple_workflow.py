@@ -1,8 +1,6 @@
 # test docker image and container by running a
 # minimum version of the workflow
 
-# use env: dkr-vw (has python 3.10.13)
-
 from datetime import datetime
 import json
 import logging
@@ -35,21 +33,21 @@ lc = "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/data/test_po
 config = {
   "deduplicate_clip_to_footprint": False,
   "deduplicate_method": None,
-  "dir_output": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/", 
-  "dir_input": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/data/", 
+  "dir_output": ".", 
+  "dir_input": ".", 
   "ext_input": ".gpkg",
-  "dir_staged": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/staged/", 
-  "dir_geotiff": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/geotiff/",  
-  "dir_web_tiles": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/web_tiles/", 
-  "filename_staging_summary": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/staging_summary.csv",
-  "filename_rasterization_events": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/raster_events.csv",
-  "filename_rasters_summary": "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/raster_summary.csv",
+  "dir_staged": "staged/", 
+  "dir_geotiff": "geotiff/",  
+  "dir_web_tiles": "web_tiles/", 
+  "filename_staging_summary": "staging_summary.csv",
+  "filename_rasterization_events": "raster_events.csv",
+  "filename_rasters_summary": "raster_summary.csv",
   "version": datetime.now().strftime("%B%d,%Y"),
   "simplify_tolerance": 0.1,
   "tms_id": "WGS1984Quad",
   "z_range": [
     0,
-    9
+    7
   ],
   "geometricError": 57,
   "z_coord": 0,
