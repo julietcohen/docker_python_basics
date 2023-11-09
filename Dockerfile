@@ -3,17 +3,23 @@
 # for simple_workflow.py:
 
 # base image
-FROM python:3.10
+FROM python:3.9
 
-WORKDIR /Users/jcohen/Documents/docker/viz-workflow-practice/workflow
+WORKDIR /Users/jcohen/Documents/docker/repositories/docker_python_basics
 
 # python script to run
 ADD simple_workflow.py .
+
+# data to process
+COPY data/test_polygons.gpkg .
 
 # packages to install
 # the build will fail if these don't work
 RUN pip install git+https://github.com/PermafrostDiscoveryGateway/viz-staging.git
 RUN pip install git+https://github.com/PermafrostDiscoveryGateway/viz-raster.git
+RUN pip install pydantic==1.10.9
+# can remove the pydantic requirement when merge the existing PR that has this change for viz-raster
+# so that will already satisfy this requirement 
 
 CMD [ "python", "./simple_workflow.py" ]
 

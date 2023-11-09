@@ -28,7 +28,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-lc = "/Users/jcohen/Documents/docker/viz-workflow-practice/workflow/data/test_polygons.gpkg"
+lc = "test_polygons.gpkg"
 
 config = {
   "deduplicate_clip_to_footprint": False,
@@ -36,12 +36,12 @@ config = {
   "dir_output": ".", 
   "dir_input": ".", 
   "ext_input": ".gpkg",
-  "dir_staged": "staged/", 
-  "dir_geotiff": "geotiff/",  
-  "dir_web_tiles": "web_tiles/", 
-  "filename_staging_summary": "staging_summary.csv",
-  "filename_rasterization_events": "raster_events.csv",
-  "filename_rasters_summary": "raster_summary.csv",
+  "dir_staged": "./staged/", 
+  "dir_geotiff": "./geotiff/",  
+  "dir_web_tiles": "./web_tiles/", 
+  "filename_staging_summary": "./staging_summary.csv",
+  "filename_rasterization_events": "./raster_events.csv",
+  "filename_rasters_summary": "./raster_summary.csv",
   "version": datetime.now().strftime("%B%d,%Y"),
   "simplify_tolerance": 0.1,
   "tms_id": "WGS1984Quad",
