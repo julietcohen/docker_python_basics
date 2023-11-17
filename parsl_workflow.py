@@ -2,10 +2,7 @@
 # with kubernetes by running a minimum version of 
 # the workflow with a kubernetes parsl config
 
-# data input sample, with ~370 GB and 6 files: 
-# /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640
-# data input sample with ~750 MB and 10 files:
-# /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32651-32660/
+# documentation for parsl config: https://parsl.readthedocs.io/en/stable/userguide/configuring.html#kubernetes-clusters
 
 
 from datetime import datetime
@@ -24,7 +21,6 @@ from parsl.executors import HighThroughputExecutor
 from parsl.providers import KubernetesProvider
 from parsl.addresses import address_by_route
 from kubernetes import client, config
-
 
 import shutil
 
@@ -62,70 +58,69 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-
-# activate_conda = 'source /home/jcohen/.bashrc; conda activate ___'
-# htex_local = Config(
-#     executors=[
-#         HighThroughputExecutor(
-#             label="htex_local",
-#             worker_debug=False,
-#             #cores_per_worker=1,
-#             max_workers=3,
-#             provider=LocalProvider(
-#                 #channel=LocalChannel(),
-#                 init_blocks=1,
-#                 max_blocks=1,
-#                 worker_init=activate_conda
-#             ),
-#         )
-#     ],
-# )
-# parsl.clear()
-# parsl.load(htex_local)
-
+# define variables for config
+max_blocks=2, 
+min_blocks=1, 
+init_blocks=2, 
+max_workers=1, 
+cores_per_worker=1, 
+image='ghcr.io/mbjones/k8sparsl:0.3', # change to my image name  
+namespace='pdgrun'
 
 htex_kube = Config(
-        executors=[
-            HighThroughputExecutor(
-                label='kube-htex',
-                cores_per_worker=1,
-                max_workers=2,
-                worker_logdir_root='/',
-                # Address for the pod worker to connect back
-                # address=address_by_route(),
-                address='192.168.0.103',
-                # address_probe_timeout=3600,
-                worker_debug=True,
-                provider=KubernetesProvider(
-                    namespace="pdgrun",
-                    image='parsl_workflow',
-                    
-                    # Command to be run upon pod start, such as:
-                    # 'module load Anaconda; source activate parsl_env'.
-                    # or 'pip install parsl'
-                    #worker_init='echo "Worker started..."; lf=`find . -name \'manager.log\'` tail -n+1 -f ${lf}',
-                    worker_init='echo "Worker started..."',
+    executors=[
+        HighThroughputExecutor(
+            label='kube-htex',
+            cores_per_worker=cores_per_worker,
+            max_workers=max_workers,
+            worker_logdir_root='/',
+            # Address for the pod worker to connect back
+            address=address_by_route(),
+            #address='192.168.0.103',
+            #address_probe_timeout=3600,
+            worker_debug=True,
+            provider=KubernetesProvider(
 
-                    # The secret key to download the image
-                    # secret="YOUR_KUBE_SECRET",
+                # Namespace in K8S to use for the run
+                namespace=namespace,
 
-                    # Should follow the Kubernetes naming rules
-                    pod_name='parsl-worker',
+                # Docker image url to use for pods
+                image=image,
 
-                    nodes_per_block=1,
-                    init_blocks=2,
-                    min_blocks=1,
-                    # Maximum number of pods to scale up
-                    max_blocks=4,
-                ),
+                # Command to be run upon pod start, such as:
+                # 'module load Anaconda; source activate parsl_env'.
+                # or 'pip install parsl'
+                #worker_init='echo "Worker started..."; lf=`find . -name \'manager.log\'` tail -n+1 -f ${lf}',
+                worker_init='echo "Worker started..."',
+
+                # The secret key to download the image
+                #secret="YOUR_KUBE_SECRET",
+
+                # Should follow the Kubernetes naming rules
+                pod_name='parsl-worker',
+
+                nodes_per_block=1,
+                init_blocks=init_blocks,
+                min_blocks=min_blocks,
+                # Maximum number of pods to scale up
+                max_blocks=max_blocks,
+                # persistent_volumes (list[(str, str)]) – List of tuples 
+                # describing persistent volumes to be mounted in the pod. 
+                # The tuples consist of (PVC Name, Mount Directory).
+                # persistent_volumes=[('mypvc','/var/data')]
             ),
-        ]
-    )
-    # parsl.load(local_exec)
+        ),
+    ]
+)
 parsl.load(htex_kube)
 
 
 lc = "test_polygons.gpkg"
+# data input sample, with ~370 GB and 6 files: 
+# /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640
+# data input sample with ~750 MB and 10 files:
+# /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32651-32660/
+
 
 def run_pdg_workflow(
     workflow_config,
