@@ -12,7 +12,25 @@ import pdgraster
 
 import shutil
 
+
 print("Removing old directories and files...")
+old_filepaths = ["/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/staging_summary.csv",
+                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/raster_summary.csv",
+                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/raster_events.csv",
+                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/config__updated.json",
+                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/log.log"]
+for old_file in old_filepaths:
+  if os.path.exists(old_file):
+      os.remove(old_file)
+
+# remove dirs from past run
+old_dirs = ["/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/staged",
+            "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/geotiff",
+            "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/web_tiles"]
+for old_dir in old_dirs:
+  if os.path.exists(old_dir) and os.path.isdir(old_dir):
+      shutil.rmtree(old_dir)
+
 
 # configure logger
 logger = logging.getLogger("logger")
@@ -78,7 +96,6 @@ config = {
 print("Staging...")
 
 stager = pdgstaging.TileStager(config = config, check_footprints = False)
-
 # generate the staged files
 stager.stage(lc)
 

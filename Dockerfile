@@ -1,17 +1,22 @@
 # -----------------------------------------------------
 
-# for simple_workflow.py:
+# for parsl_workflow.py:
 
 # base image
 FROM python:3.9
 
 WORKDIR /Users/jcohen/Documents/docker/repositories/docker_python_basics
 
-COPY simple_workflow.py .
+COPY parsl_workflow.py .
 COPY data/test_polygons.gpkg .
+# use the following line if reading from Datateam server:
+# COPY /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640 .
 
 RUN pip install git+https://github.com/PermafrostDiscoveryGateway/viz-staging.git
 RUN pip install git+https://github.com/PermafrostDiscoveryGateway/viz-raster.git
+RUN pip install parsl
+RUN pip install kubernetes
+#RUN pip install glances
 RUN pip install pydantic==1.10.9
 # NOTES:
 # 1. can remove the pydantic requirement when merge the existing PR that has this change for viz-raster
@@ -19,7 +24,7 @@ RUN pip install pydantic==1.10.9
 # 2. can list all requirements in a requirements.txt file and just RUN that file,
 # which allows only 1 layer to be added to the image
 
-CMD [ "python", "./simple_workflow.py" ]
+CMD [ "python", "./parsl_workflow.py" ]
 
 # -----------------------------------------------------
 
