@@ -20,11 +20,20 @@ from parsl.config import Config
 from parsl.executors import HighThroughputExecutor
 from parsl.providers import KubernetesProvider
 from parsl.addresses import address_by_route
-from kubernetes import client, config
+#from kubernetes import client, config # NOTE: might need to import this? not sure
+from parsl_config import config_parsl_cluster
 
 import shutil
 
 
+# call parsl config and initiate k8s cluster
+# TODO: change image to my image built from Dockerfile in this repo
+parsl.set_stream_logger()
+htex_kube = config_parsl_cluster(max_blocks=5, image='ghcr.io/mbjones/k8sparsl:0.3', namespace='pdgrun')
+parsl.load(htex_kube)
+
+
+# start with a fresh directory!
 print("Removing old directories and files...")
 old_filepaths = ["/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/staging_summary.csv",
                 "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/raster_summary.csv",
@@ -58,63 +67,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# define variables for config
-max_blocks=2, 
-min_blocks=1, 
-init_blocks=2, 
-max_workers=1, 
-cores_per_worker=1, 
-image='ghcr.io/mbjones/k8sparsl:0.3', # change to my image name  
-namespace='pdgrun'
-
-htex_kube = Config(
-    executors=[
-        HighThroughputExecutor(
-            label='kube-htex',
-            cores_per_worker=cores_per_worker,
-            max_workers=max_workers,
-            worker_logdir_root='/',
-            # Address for the pod worker to connect back
-            address=address_by_route(),
-            #address='192.168.0.103',
-            #address_probe_timeout=3600,
-            worker_debug=True,
-            provider=KubernetesProvider(
-
-                # Namespace in K8S to use for the run
-                namespace=namespace,
-
-                # Docker image url to use for pods
-                image=image,
-
-                # Command to be run upon pod start, such as:
-                # 'module load Anaconda; source activate parsl_env'.
-                # or 'pip install parsl'
-                #worker_init='echo "Worker started..."; lf=`find . -name \'manager.log\'` tail -n+1 -f ${lf}',
-                worker_init='echo "Worker started..."',
-
-                # The secret key to download the image
-                #secret="YOUR_KUBE_SECRET",
-
-                # Should follow the Kubernetes naming rules
-                pod_name='parsl-worker',
-
-                nodes_per_block=1,
-                init_blocks=init_blocks,
-                min_blocks=min_blocks,
-                # Maximum number of pods to scale up
-                max_blocks=max_blocks,
-                # persistent_volumes (list[(str, str)]) – List of tuples 
-                # describing persistent volumes to be mounted in the pod. 
-                # The tuples consist of (PVC Name, Mount Directory).
-                # persistent_volumes=[('mypvc','/var/data')]
-            ),
-        ),
-    ]
-)
-parsl.load(htex_kube)
-
-
+# define input data for lake size change dataset
 lc = "test_polygons.gpkg"
 # data input sample, with ~370 GB and 6 files: 
 # /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640
@@ -399,13 +352,13 @@ def make_batch(items, batch_size):
 # ----------------------------------------------------------------
 
 # run the workflow
-config_file = '/Users/jcohen/Documents/docker/repositories/docker_python_basics/config.json'
+config_file = '/Users/jcohen/Documents/docker/repositories/docker_python_basics/viz_config.json'
 logging.info(f'🗂 Workflow configuration loaded from {config_file}')
 print("Loaded config. Running workflow.")
 logging.info(f'Starting PDG workflow: staging, rasterization, and web tiling')
 run_pdg_workflow(config_file)
 # Shutdown and clear the parsl executor
-htex_local.executors[0].shutdown()
-parsl.clear()
+htex_kube.executors[0].shutdown() # NOTE: probs don't need this line bc parsl cleans up after itself when run goes smoothly (deletes pods automatically)
+parsl.clear() # NOTE: likely dont need this line either? 
 
 print("Script complete.")

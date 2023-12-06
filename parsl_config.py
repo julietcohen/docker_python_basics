@@ -3,13 +3,15 @@ from parsl.executors import HighThroughputExecutor
 from parsl.providers import KubernetesProvider
 from parsl.addresses import address_by_route
 
+# TODO: change image to my image built from Dockerfile in this repo
+
 def config_parsl_cluster(
         max_blocks=2, 
         min_blocks=1, 
         init_blocks=2, 
         max_workers=1, 
         cores_per_worker=1, 
-        image='ghcr.io/mbjones/k8sparsl:0.3', 
+        image='ghcr.io/mbjones/k8sparsl:0.3', # need to change this
         namespace='pdgrun'):
 
     htex_kube = Config(

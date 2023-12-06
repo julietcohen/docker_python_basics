@@ -87,7 +87,7 @@ config = {
                   "#66CDAA", # MediumAquaMarine
                   "#AFEEEE", # PaleTurquoise,
                   "#0000ff"], # blue
-      "nodata_val": None,
+      "nodata_val": 0,
       "nodata_color": "#ffffff00" # fully transparent white
     },
   ],
