@@ -3,15 +3,13 @@ from parsl.executors import HighThroughputExecutor
 from parsl.providers import KubernetesProvider
 from parsl.addresses import address_by_route
 
-# TODO: change image to my image built from Dockerfile in this repo
-
 def config_parsl_cluster(
         max_blocks=2, 
         min_blocks=1, 
         init_blocks=2, 
         max_workers=1, 
         cores_per_worker=1, 
-        image='ghcr.io/mbjones/k8sparsl:0.3', # need to change this
+        image='ghcr.io/julietcohen/docker_python_basics:0.1',
         namespace='pdgrun'):
 
     htex_kube = Config(
@@ -30,7 +28,7 @@ def config_parsl_cluster(
     
                     # Namespace in K8S to use for the run
                     namespace=namespace,
-    
+                    
                     # Docker image url to use for pods
                     image=image,
     
@@ -39,9 +37,6 @@ def config_parsl_cluster(
                     # or 'pip install parsl'
                     #worker_init='echo "Worker started..."; lf=`find . -name \'manager.log\'` tail -n+1 -f ${lf}',
                     worker_init='echo "Worker started..."',
-    
-                    # The secret key to download the image
-                    #secret="YOUR_KUBE_SECRET",
     
                     # Should follow the Kubernetes naming rules
                     pod_name='parsl-worker',
