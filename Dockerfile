@@ -28,7 +28,7 @@ RUN pip install -r requirements.txt
 
 # maybe we don't want to run a command bc we need to use the terminal to
 # do it now that we are using parsl and k8s
-# CMD [ "python", "./parsl_workflow.py" ]
+CMD [ "python", "./parsl_workflow.py" ]
 
 # -----------------------------------------------------
 
