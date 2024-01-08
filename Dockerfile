@@ -16,6 +16,7 @@ WORKDIR /home/jcohen/docker_python_basics
 COPY parsl_workflow.py .
 COPY parsl_config.py .
 COPY requirements.txt .
+COPY viz_config.json .
 # for run with LC data on local computer:
 #ADD /Users/jcohen/Documents/PDG/lake_change_GD_2022-11-04_cleaned/cleaned_files/data_products_32635-32640 ./data_products_32635-32640
 # ADD ./LC_data .
@@ -28,7 +29,7 @@ RUN pip install -r requirements.txt
 
 # maybe we don't want to run a command bc we need to use the terminal to
 # do it now that we are using parsl and k8s
-CMD [ "python", "./parsl_workflow.py" ]
+# CMD [ "python", "./parsl_workflow.py" ]
 
 # -----------------------------------------------------
 
