@@ -9,7 +9,7 @@ def config_parsl_cluster(
         init_blocks=2, 
         max_workers=1, 
         cores_per_worker=1, 
-        image='ghcr.io/julietcohen/docker_python_basics:0.1',
+        image='ghcr.io/julietcohen/docker_python_basics:0.3',
         namespace='pdgrun'):
 
     htex_kube = Config(

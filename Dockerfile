@@ -9,18 +9,18 @@ FROM python:3.10
 LABEL org.opencontainers.image.source https://github.com/julietcohen/docker_python_basics
 
 # use the following line if working on local computer:
-WORKDIR /Users/jcohen/Documents/docker/repositories/docker_python_basics
+# WORKDIR /Users/jcohen/Documents/docker/repositories/docker_python_basics
 # use the following line if working from Datateam server:
-#WORKDIR /home/jcohen/docker_python_basics
+WORKDIR /home/jcohen/docker_python_basics
 
 COPY parsl_workflow.py .
 COPY parsl_config.py .
 COPY requirements.txt .
 # for run with LC data on local computer:
 #ADD /Users/jcohen/Documents/PDG/lake_change_GD_2022-11-04_cleaned/cleaned_files/data_products_32635-32640 ./data_products_32635-32640
-ADD ./LC_data .
+# ADD ./LC_data .
 # for run with LC data on Datateam:
-#COPY /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640 .
+COPY /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640 .
 
 RUN pip install -r requirements.txt
 
