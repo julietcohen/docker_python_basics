@@ -29,7 +29,7 @@ import shutil
 # call parsl config and initiate k8s cluster
 # TODO: change image to my image built from Dockerfile in this repo
 parsl.set_stream_logger()
-htex_kube = config_parsl_cluster(max_blocks=5, image='ghcr.io/mbjones/k8sparsl:0.3', namespace='pdgrun')
+htex_kube = config_parsl_cluster(max_blocks=5, image='ghcr.io/julietcohen/docker_python_basics:0.3', namespace='pdgrun')
 parsl.load(htex_kube)
 
 

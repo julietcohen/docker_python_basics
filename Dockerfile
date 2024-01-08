@@ -19,8 +19,10 @@ COPY requirements.txt .
 # for run with LC data on local computer:
 #ADD /Users/jcohen/Documents/PDG/lake_change_GD_2022-11-04_cleaned/cleaned_files/data_products_32635-32640 ./data_products_32635-32640
 # ADD ./LC_data .
-# for run with LC data on Datateam:
-COPY /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640 .
+# for run with LC data from /var/data/submission/ on Datateam:
+# COPY /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640 .
+# for run with sample of LC data in home dir on Datateam:
+ADD data/test_polygons.gpkg .
 
 RUN pip install -r requirements.txt
 
