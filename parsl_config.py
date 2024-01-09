@@ -7,9 +7,9 @@ def config_parsl_cluster(
         max_blocks=2, 
         min_blocks=1, 
         init_blocks=2, 
-        max_workers=1, 
+        max_workers=7, 
         cores_per_worker=1, 
-        image='ghcr.io/julietcohen/docker_python_basics:0.3',
+        image='ghcr.io/julietcohen/docker_python_basics:0.6',
         namespace='pdgrun'):
 
     htex_kube = Config(
@@ -46,10 +46,11 @@ def config_parsl_cluster(
                     min_blocks=min_blocks,
                     # Maximum number of pods to scale up
                     max_blocks=max_blocks,
+
                     # persistent_volumes (list[(str, str)]) – List of tuples 
                     # describing persistent volumes to be mounted in the pod. 
                     # The tuples consist of (PVC Name, Mount Directory).
-                    # persistent_volumes=[('mypvc','/var/data')]
+                    persistent_volumes=[('pdgrun-dev-0','/home/jcohen/docker_python_basics/app-data')]
                 ),
             ),
         ]

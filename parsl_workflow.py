@@ -12,6 +12,7 @@ import logging.handlers
 import os
 
 import pdgstaging
+from pdgstaging import logging_config
 import pdgraster
 
 import parsl
@@ -25,47 +26,81 @@ from parsl_config import config_parsl_cluster
 
 import shutil
 
+import subprocess
+from subprocess import Popen
+user = subprocess.check_output("whoami").strip().decode("ascii")
+
 
 # call parsl config and initiate k8s cluster
-# TODO: change image to my image built from Dockerfile in this repo
+# TODO each time a new image has been pushed: update image version to most recent
 parsl.set_stream_logger()
-htex_kube = config_parsl_cluster(max_blocks=5, image='ghcr.io/julietcohen/docker_python_basics:0.3', namespace='pdgrun')
+htex_kube = config_parsl_cluster(max_blocks=5, image='ghcr.io/julietcohen/docker_python_basics:0.5', namespace='pdgrun')
 parsl.load(htex_kube)
 
 
 # start with a fresh directory!
 print("Removing old directories and files...")
-old_filepaths = ["/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/staging_summary.csv",
-                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/raster_summary.csv",
-                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/raster_events.csv",
-                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/config__updated.json",
-                "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/log.log"]
+base_dir = "/home/jcohen/docker_python_basics/app/"
+old_filepaths = [f"{base_dir}staging_summary.csv",
+                f"{base_dir}raster_summary.csv",
+                f"{base_dir}raster_events.csv",
+                f"{base_dir}config__updated.json",
+                f"{base_dir}log.log"]
 for old_file in old_filepaths:
   if os.path.exists(old_file):
       os.remove(old_file)
 
 # remove dirs from past run
-old_dirs = ["/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/staged",
-            "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/geotiff",
-            "/Users/jcohen/Documents/docker/repositories/docker_python_basics/app/web_tiles"]
+old_dirs = [f"{base_dir}staged",
+            f"{base_dir}geotiff",
+            f"{base_dir}web_tiles"]
 for old_dir in old_dirs:
   if os.path.exists(old_dir) and os.path.isdir(old_dir):
       shutil.rmtree(old_dir)
 
-
-# configure logger
-logger = logging.getLogger("logger")
-# Remove any existing handlers from the logger
-for handler in logger.handlers[:]:
-    logger.removeHandler(handler)
-# prevent logging statements from being printed to terminal
-logger.propagate = False
-# set up new handler
-handler = logging.FileHandler("/tmp/log.log")
-formatter = logging.Formatter(logging.BASIC_FORMAT)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+config = {
+    "deduplicate_clip_to_footprint": False,
+    "deduplicate_method": None,
+    "dir_output": "/app", 
+    "dir_input": ".", 
+    "ext_input": ".gpkg",
+    "dir_staged": "/app/staged/", 
+    "dir_geotiff": "/app/geotiff/",  
+    "dir_web_tiles": "/app/web_tiles/", 
+    "filename_staging_summary": "/app/staging_summary.csv",
+    "filename_rasterization_events": "/app/raster_events.csv",
+    "filename_rasters_summary": "/app/raster_summary.csv",
+    "simplify_tolerance": 0.1,
+    "tms_id": "WGS1984Quad",
+    "z_range": [
+    0,
+    7
+    ],
+    "geometricError": 57,
+    "z_coord": 0,
+    "statistics": [
+    {
+    "name": "change_rate", 
+    "weight_by": "area",
+    "property": "ChangeRateNet_myr-1", 
+    "aggregation_method": "min", 
+    "resampling_method": "mode",  
+    "val_range": [
+        -2,
+        2
+    ],
+    "palette": ["#ff0000", 
+                "#FF8C00", 
+                "#FFA07A", 
+                "#FFFF00", 
+                "#66CDAA", 
+                "#AFEEEE", 
+                "#0000ff"], 
+    "nodata_val": 0,
+    "nodata_color": "#ffffff00"
+    }
+  ]
+}
 
 # define input data for lake size change dataset
 lc = "test_polygons.gpkg"
@@ -89,8 +124,7 @@ def run_pdg_workflow(
     Parameters
     ----------
     workflow_config : dict
-        Configuration for the PDG staging workflow, tailored to rasterization and 
-        web tiling steps only.
+        Configuration for the PDG visualization workflow.
     batch_size: int
         How many staged files, geotiffs, or web tiles should be included in a single creation
         task? (each task is run in parallel) Default: 300
@@ -220,20 +254,7 @@ def stage(paths, config):
     import logging.handlers
     import os
     import pdgstaging
-
-    # configure logger:
-    logger = logging.getLogger("logger")
-    # Remove any existing handlers from the logger
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-    # prevent logging statements from being printed to terminal
-    logger.propagate = False
-    # set up new handler
-    handler = logging.FileHandler("/tmp/log.log")
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    from pdgstaging import logging_config
 
     stager = pdgstaging.TileStager(config = config, check_footprints = False)
     for path in paths:
@@ -252,20 +273,7 @@ def create_highest_geotiffs(staged_paths, config):
     import logging.handlers
     import os
     import pdgraster
-
-    # configure logger:
-    logger = logging.getLogger("logger")
-    # Remove any existing handlers from the logger
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-    # prevent logging statements from being printed to terminal
-    logger.propagate = False
-    # set up new handler
-    handler = logging.FileHandler("/tmp/log.log")
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    from pdgraster import logging_config
 
     # rasterize the vectors, highest z-level only
     rasterizer = pdgraster.RasterTiler(config)
@@ -287,20 +295,7 @@ def create_composite_geotiffs(tiles, config):
     import logging.handlers
     import os
     import pdgraster
-
-    # configure logger:
-    logger = logging.getLogger("logger")
-    # Remove any existing handlers from the logger
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-    # prevent logging statements from being printed to terminal
-    logger.propagate = False
-    # set up new handler
-    handler = logging.FileHandler("/tmp/log.log")
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    from pdgraster import logging_config
 
     rasterizer = pdgraster.RasterTiler(config)
     return rasterizer.parent_geotiffs_from_children(
@@ -321,20 +316,7 @@ def create_web_tiles(geotiff_paths, config):
     import logging.handlers
     import os
     import pdgraster
-
-    # configure logger:
-    logger = logging.getLogger("logger")
-    # Remove any existing handlers from the logger
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-    # prevent logging statements from being printed to terminal
-    logger.propagate = False
-    # set up new handler
-    handler = logging.FileHandler("/tmp/log.log")
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    from pdgraster import logging_config
 
     rasterizer = pdgraster.RasterTiler(config)
     return rasterizer.webtiles_from_geotiffs(
@@ -352,13 +334,16 @@ def make_batch(items, batch_size):
 # ----------------------------------------------------------------
 
 # run the workflow
-config_file = '/Users/jcohen/Documents/docker/repositories/docker_python_basics/viz_config.json'
-logging.info(f'🗂 Workflow configuration loaded from {config_file}')
-print("Loaded config. Running workflow.")
-logging.info(f'Starting PDG workflow: staging, rasterization, and web tiling')
-run_pdg_workflow(config_file)
+logging.info(f'Starting PDG workflow: staging, rasterization, and web tiling.')
+run_pdg_workflow(config)
 # Shutdown and clear the parsl executor
-htex_kube.executors[0].shutdown() # NOTE: probs don't need this line bc parsl cleans up after itself when run goes smoothly (deletes pods automatically)
-parsl.clear() # NOTE: likely dont need this line either? 
+htex_kube.executors[0].shutdown()
+parsl.clear()
+
+# transfer log from /tmp to user dir
+# TODO: automate log tansfer to not be hard-coded, pull destination path from the config
+cmd = ['mv', '/tmp/log.log', f'/home/{user}/docker_python_basics/app-data/']
+# initiate the process to run that command
+process = Popen(cmd)
 
 print("Script complete.")
