@@ -61,15 +61,15 @@ for old_dir in old_dirs:
 config = {
     "deduplicate_clip_to_footprint": False,
     "deduplicate_method": None,
-    "dir_output": "/app", 
-    "dir_input": ".", 
+    "dir_output": ".", 
+    "dir_input": "input", 
     "ext_input": ".gpkg",
-    "dir_staged": "/app/staged/", 
-    "dir_geotiff": "/app/geotiff/",  
-    "dir_web_tiles": "/app/web_tiles/", 
-    "filename_staging_summary": "/app/staging_summary.csv",
-    "filename_rasterization_events": "/app/raster_events.csv",
-    "filename_rasters_summary": "/app/raster_summary.csv",
+    "dir_staged": "staged/", 
+    "dir_geotiff": "geotiff/",  
+    "dir_web_tiles": "web_tiles/", 
+    "filename_staging_summary": "staging_summary.csv",
+    "filename_rasterization_events": "raster_events.csv",
+    "filename_rasters_summary": "raster_summary.csv",
     "simplify_tolerance": 0.1,
     "tms_id": "WGS1984Quad",
     "z_range": [
@@ -102,8 +102,6 @@ config = {
   ]
 }
 
-# define input data for lake size change dataset
-lc = "test_polygons.gpkg"
 # data input sample, with ~370 GB and 6 files: 
 # /var/data/submission/pdg/nitze_lake_change/data_2022-11-04/lake_change_GD_cleaned/cleaned_files/data_products_32635-32640
 # data input sample with ~750 MB and 10 files:
