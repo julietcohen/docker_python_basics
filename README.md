@@ -30,8 +30,12 @@ echo $GITHUB_PAT | docker login ghcr.io -u julietcohen --password-stdin
 
 docker push ghcr.io/julietcohen/docker_python_basics:0.3
 ```
-4. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
-5. run the python script for the parsl workflow: `python parsl_workflow.py`
+
+4. Run `kubectl get pods` to see if any pods are left hanging from the last run. This could be the case if a past run failed to shut down the parsl workers. If there are any hanging, delete them all at once (for the specific namespace you're workin with) by running `kubectl delete pods --all -n {namespace}`.
+
+5. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
+
+6. run the python script for the parsl workflow: `python parsl_workflow.py`
 
 **General Notes:**
 - if run is successful, parsl processes should shut down cleanly. If not, you'll need to kill the processes manually

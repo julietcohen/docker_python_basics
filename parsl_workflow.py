@@ -40,7 +40,10 @@ parsl.load(htex_kube)
 
 # start with a fresh directory!
 print("Removing old directories and files...")
-base_dir = "/home/jcohen/docker_python_basics/app/"
+# TOD0: define base dir by pulling the WORKDIR from Dockerfile
+# or pulling the second component (filepath) from the parsl config's "persistent_volumes" definition
+# instead of hard-coding
+base_dir = "/home/jcohen/docker_python_basics/app-data/"
 old_filepaths = [f"{base_dir}staging_summary.csv",
                 f"{base_dir}raster_summary.csv",
                 f"{base_dir}raster_events.csv",
