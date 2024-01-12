@@ -7,7 +7,7 @@ Testing out how to work with Docker and python scripts to execute geospatial ana
 1. clone repository & open Docker Desktop, navigate to repository in VScode
 2. edit paths in Dockerfile as needed, and ensure the parsl config does not have line for persistent directory, because that is only needed in the config if running on a remote sever
 3. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
-4. `docker build -t image_name` 
+4. `docker build -t image_name .` 
 5. Run container with persistent directory for input and output data, updating the path as needed: `docker run -v /Users/jcohen/Documents/docker/repositories/docker_python_basics/app:/app image_name`
 
 **Steps to build image from published reporitory package and run container on server:**

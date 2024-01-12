@@ -34,7 +34,7 @@ user = subprocess.check_output("whoami").strip().decode("ascii")
 # call parsl config and initiate k8s cluster
 # TODO each time a new image has been pushed: update image version to most recent
 parsl.set_stream_logger()
-htex_kube = config_parsl_cluster(max_blocks=5, image='ghcr.io/julietcohen/docker_python_basics:0.5', namespace='pdgrun')
+htex_kube = config_parsl_cluster() # use default settings defined in parsl_config.py
 parsl.load(htex_kube)
 
 
@@ -144,6 +144,8 @@ def run_pdg_workflow(
     input_batches = make_batch(input_paths, batch_size)
 
     # Stage all the input files (each batch in parallel)
+    print("------------------------------ STAGING INITIATED ------------------------------")
+
     app_futures = []
     for i, batch in enumerate(input_batches):
         app_future = stage(batch, workflow_config)
@@ -167,6 +169,8 @@ def run_pdg_workflow(
     staged_batches = make_batch(staged_paths, batch_size)
     logging.info(f'Processing staged files in {len(staged_batches)} batches.')
 
+    print("------------------------------ RASTER HIGHEST INITIATED ------------------------------")
+
     app_futures = []
     for i, batch in enumerate(staged_batches):
         app_future = create_highest_geotiffs(batch, workflow_config)
@@ -186,6 +190,7 @@ def run_pdg_workflow(
     parent_zs = range(max_z - 1, min_z - 1, -1)
 
     # Can't start lower z-level until higher z-level is complete.
+    print("------------------------------ RASTER LOWER INITIATED ------------------------------")
     for z in parent_zs:
 
         # Determine which tiles we need to make for the next z-level based on the
