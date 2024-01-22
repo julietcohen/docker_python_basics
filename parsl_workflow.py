@@ -43,7 +43,7 @@ print("Removing old directories and files...")
 # TOD0: define base dir by pulling the WORKDIR from Dockerfile
 # or pulling the second component (filepath) from the parsl config's "persistent_volumes" definition
 # instead of hard-coding
-base_dir = "/home/jcohen/docker_python_basics/app-data/"
+base_dir = "/app-data/"
 old_filepaths = [f"{base_dir}staging_summary.csv",
                 f"{base_dir}raster_summary.csv",
                 f"{base_dir}raster_events.csv",
@@ -64,15 +64,15 @@ for old_dir in old_dirs:
 config = {
     "deduplicate_clip_to_footprint": False,
     "deduplicate_method": None,
-    "dir_output": ".", 
-    "dir_input": "input", 
-    "ext_input": ".gpkg",
-    "dir_staged": "staged/", 
-    "dir_geotiff": "geotiff/",  
-    "dir_web_tiles": "web_tiles/", 
-    "filename_staging_summary": "staging_summary.csv",
-    "filename_rasterization_events": "raster_events.csv",
-    "filename_rasters_summary": "raster_summary.csv",
+    "dir_output": base_dir, 
+  "dir_input": base_dir+"input", 
+  "ext_input": ".gpkg",
+  "dir_staged": base_dir+"staged/", 
+  "dir_geotiff": base_dir+"geotiff/",  
+  "dir_web_tiles": base_dir+"web_tiles/", 
+  "filename_staging_summary": base_dir+"staging_summary.csv",
+  "filename_rasterization_events": base_dir+"raster_events.csv",
+  "filename_rasters_summary": base_dir+"raster_summary.csv",
     "simplify_tolerance": 0.1,
     "tms_id": "WGS1984Quad",
     "z_range": [
