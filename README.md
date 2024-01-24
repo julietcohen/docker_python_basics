@@ -23,7 +23,7 @@ While any of the scripts in this repo can be run locally or on Datateam, my reco
 
 4. Finally, run the `parsl_worfklow.py` on Datateam with a persistent volume specified within the `parsl` config, not in the `docker run` command. 
 
-## 1. For ANY of the scripts: Steps to build an image and run the container on a local machine
+## 1. For either `simple_test.py` or `simple_worfklow.py`: Steps to build an image and run the container on a local machine
 
 1. clone repository & open Docker Desktop, navigate to repository in VScode
 2. edit paths in Dockerfile as needed
@@ -31,7 +31,7 @@ While any of the scripts in this repo can be run locally or on Datateam, my reco
 4. `docker build -t image_name .` 
 5. Run container with persistent directory for input and output data, updating the path as needed: `docker run -v /Users/jcohen/Documents/docker/repositories/docker_python_basics/app:/app image_name`
 
-## 2. For ANY of the scripts: Steps to build an image and run the container on Datateam
+## 2. For either `simple_test.py` or `simple_worfklow.py`: Steps to build an image and run the container on Datateam
 
 1. SSH into server in VScode, clone repository, navigate to repository
 2. edit paths in Dockerfile as needed
@@ -43,15 +43,16 @@ While any of the scripts in this repo can be run locally or on Datateam, my reco
 
 1. SSH into server in VScode, clone repository, navigate to repository
 2. Make sure your token allows for publishing packages to the repo (todo: add details to this)
-2. edit paths in Dockerfile as needed, and update string that represents the published repository package version of image in `parsl_config.py` 
+3. Edit paths in Dockerfile as needed
+4. If running `parsl` script, update string that represents the published repository package version of image in `parsl_config.py` 
 ```
 image='ghcr.io/julietcohen/docker_python_basics:0.9',
 ```
-3. add line to parsl config to specify the persistent volume name and mount filepath
+5. add line to parsl config to specify the persistent volume name and mount filepath
 ```
 persistent_volumes=[('pdgrun-dev-0','/home/jcohen/docker_python_basics/app-data')]
 ```
-3. publish package to repository with new version number by running 3 commands:
+6. publish package to repository with new version number by running 3 commands:
 ```
 docker build -t ghcr.io/julietcohen/docker_python_basics:0.9 .
 
@@ -60,11 +61,11 @@ echo $GITHUB_PAT | docker login ghcr.io -u julietcohen --password-stdin
 docker push ghcr.io/julietcohen/docker_python_basics:0.9
 ```
 
-4. Run `kubectl get pods` to see if any pods are left hanging from the last run. This could be the case if a past run failed to shut down the parsl workers. If there are any hanging, delete them all at once (for the specific namespace you're workin with) by running `kubectl delete pods --all -n {namespace}`.
+7. Run `kubectl get pods` to see if any pods are left hanging from the last run. This could be the case if a past run failed to shut down the parsl workers. If there are any hanging, delete them all at once (for the specific namespace you're workin with) by running `kubectl delete pods --all -n {namespace}`.
 
-5. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
+8. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
 
-6. run the python script for the parsl workflow: `python parsl_workflow.py`
+9. run the python script for the parsl workflow: `python parsl_workflow.py`
 
 **General Notes:**
 - if run is successful, parsl processes should shut down cleanly. If not, you'll need to kill the processes manually
