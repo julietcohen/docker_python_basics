@@ -21,38 +21,45 @@ While any of the scripts in this repo can be run locally or on Datateam, my reco
 
 3. Then get `simple_workflow.py` to run on Datateam, and mount the volume in the same way, with the `docker run` command. This script writes several directories and many more files!
 
-4. Finally, run the `parsl_worfklow.py` on Datateam with a persistent volume specified within the `parsl` config, not in the `docker run` command. 
+4. Finally, run the `parsl_worfklow.py` on Datateam with a persistent volume specified within the `parsl` config, not in the `docker run` command.
 
-## 1. For either `simple_test.py` or `simple_worfklow.py`: Steps to build an image and run the container on a local machine
+See details for all these steps below:
 
-1. clone repository & open Docker Desktop, navigate to repository in VScode
-2. edit paths in Dockerfile as needed
-3. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
+## 1. For either `simple_test.py` or `simple_workflow.py`: Steps to build an image and run the container on a local machine
+
+1. Clone repository & open Docker Desktop app on your laptop, then navigate to repository in VScode.
+2. Edit filepaths in Dockerfile as needed.
+3. Ensure an environment is activated in the terminal that is built from the same `requirements.txt` file as the docker image. This requires you to create a fresh environment, activate it, then run `pip install -r requirements.txt` in the command line. 
+4. Run `docker build -t image_name .` in the command line.
+5. Run the container and specify a persistent directory for input and output data, updating the path as needed: `docker run -v /Users/jcohen/Documents/docker/repositories/docker_python_basics/app:/app image_name`
+
+## 2. For either `simple_test.py` or `simple_workflow.py`: Steps to build an image and run the container on Datateam server
+
+1. SSH into server in VScode, clone the repository, and navigate to the repository.
+2. Edit filepaths in Dockerfile as needed.
+3. Ensure an environment is activated in the terminal that is built from the same `requirements.txt` file as the docker image 
 4. `docker build -t image_name .` 
-5. Run container with persistent directory for input and output data, updating the path as needed: `docker run -v /Users/jcohen/Documents/docker/repositories/docker_python_basics/app:/app image_name`
-
-## 2. For either `simple_test.py` or `simple_worfklow.py`: Steps to build an image and run the container on Datateam
-
-1. SSH into server in VScode, clone repository, navigate to repository
-2. edit paths in Dockerfile as needed
-3. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
-4. `docker build -t image_name .` 
-5. Run container with persistent directory for input and output data, updating the path as needed: `docker run -v /home/jcohen/docker_python_basics/app:/app image_name`
+5. Run the container and specify a persistent directory for input and output data, updating the path as needed: `docker run -v /home/jcohen/docker_python_basics/app:/app image_name`
 
 ## 3. For ANY of the scripts: Steps to run a container from a published repository package (a built image) on server:
 
-1. SSH into server in VScode, clone repository, navigate to repository
-2. Make sure your token allows for publishing packages to the repo (todo: add details to this)
-3. Edit paths in Dockerfile as needed
-4. If running `parsl` script, update string that represents the published repository package version of image in `parsl_config.py` 
+1. SSH into server in VScode, clone the repository, and navigate to the repository.
+
+2. Make sure your Personal Access Token allows for publishing packages to the repo. Navigate to your token on GitHub, then scroll down to `write:packages` and check the box and save.
+
+3. Edit filepaths in Dockerfile as needed.
+
+4. If running `parsl` script, update the string that represents the published repository package version of image in `parsl_config.py`:
 ```
 image='ghcr.io/julietcohen/docker_python_basics:0.9',
 ```
-5. add line to parsl config to specify the persistent volume name and mount filepath
+
+5. Add a line to parsl config to specify the persistent volume name and mount filepath. The first item in the list will need to be a persistent volume that is set up by the server admin. The second argument is the location that you want the volume to be mounted within your container.:
 ```
 persistent_volumes=[('pdgrun-dev-0','/home/jcohen/docker_python_basics/app-data')]
 ```
-6. publish package to repository with new version number by running 3 commands:
+
+6. Publish the package to the repository with new version number by running 3 commands one-by-one. Replace `$GITHUB_PAT` with your PAT:
 ```
 docker build -t ghcr.io/julietcohen/docker_python_basics:0.9 .
 
@@ -63,10 +70,12 @@ docker push ghcr.io/julietcohen/docker_python_basics:0.9
 
 7. Run `kubectl get pods` to see if any pods are left hanging from the last run. This could be the case if a past run failed to shut down the parsl workers. If there are any hanging, delete them all at once (for the specific namespace you're workin with) by running `kubectl delete pods --all -n {namespace}`.
 
-8. ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image 
+8. Ensure an environment is activated in the terminal that is build from the same `requirements.txt` file as the docker image. 
 
-9. run the python script for the parsl workflow: `python parsl_workflow.py`
+9. Run the python script for the parsl workflow: `python parsl_workflow.py`
 
 **General Notes:**
-- if run is successful, parsl processes should shut down cleanly. If not, you'll need to kill the processes manually
-- after each run, if files were output, remove them from the persistent directory before next run
+- If the run is successful, parsl processes should shut down cleanly. If not, you'll need to kill the processes manually.
+  - You can check your processes in the command line with `ps -ef | grep {username}`
+  - In the output, the column next to your username shows the 5-digit identifier for the proess. Run `kill -9 {identifier}` to kill one in particular.
+- After each run, if files were output, remove them from the persistent directory before next run. 
